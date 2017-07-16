@@ -1,0 +1,51 @@
+шаг 1)
+
+-- генерируем пару ключей (имя ключа в комментарии, имя файла и пароль в диалоге будет спрошен)
+ssh-keygen -t rsa -b 4096 -C 'comment for a key'
+ssh-keygen -t rsa -b 4096 -C 'comment for a key' -f certfile.rsa // либо ключом -f указать имя файла в диалоге
+
+на выходе получаются два файла
+  certfile.rsa          это приватный ключ в формате линукса (ssh/scp), который мы используем при подлкючении к серверу
+  certfile.rsa.pub      это публичный ключ, который нужно указать на сервере в ~/.ssh/authorized_keys2
+                        скопируем его через
+
+-- теперь с этим ключом можно подключаться из линукса
+ssh -i ~/.ssh/certfile.rsa login@192.168.0.1
+
+
+
+шаг 2)
+перегенерируем приватный ключ в формат для putty
+для этого открываем puttygen, прогружаем certfile.rsa через кнопку Load
+и жмем "Save private key" - теперь он будет сохранен в формате, пригодном для putty
+на выходе certfile.rsa.ppk
+
+
+
+шаг 3)
+готовим сервер sshd под работу с сертификатами
+
+-- готовим файл с публичными ключами
+cat certfile.rsa.pub >> ~/.ssh/authorized_keys2     // ? man ssh-copy-id
+chmod 600 authorized_keys2
+
+-- по идее достаточно даже таких настроек, чтобы сертификат уже читался, но все остальные способы аутенфикации продолжат работать
+Protocol 2
+PasswordAuthentication yes
+UsePAM yes
+
+-- но если мы хотим усилить защиту, то авторизацию по паролю нужно закрыть
+Protocol 2
+PasswordAuthentication no
+PubkeyAuthentication   yes
+#AuthorizedKeysFile     %h/.ssh/authorized_keys2
+UsePAM no
+
+-- дополнительные права можно устанавливать
+DenyUsers impoll
+AllowUsers guest imobis
+DenyGroups operator
+AllowGroups guest imobis
+
+-- делаем доступной подсистему ftp для работы поверх ssh
+Subsystem       sftp    /usr/libexec/sftp-server
