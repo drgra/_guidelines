@@ -1,5 +1,4 @@
 шаг 1)
-
 -- генерируем пару ключей (имя ключа в комментарии, имя файла и пароль в диалоге будет спрошен)
 ssh-keygen -t rsa -b 4096 -C 'comment for a key'
 ssh-keygen -t rsa -b 4096 -C 'comment for a key' -f certfile.rsa // либо ключом -f указать имя файла в диалоге
@@ -19,6 +18,11 @@ ssh -i ~/.ssh/certfile.rsa login@192.168.0.1
 для этого открываем puttygen, прогружаем certfile.rsa через кнопку Load
 и жмем "Save private key" - теперь он будет сохранен в формате, пригодном для putty
 на выходе certfile.rsa.ppk
+
+
+если нужно убрать пароль из файла ключа, то убирается он так
+команда спросит путь к файлу и перезапишет(!) его
+ssh-keygen -p
 
 
 
@@ -49,3 +53,10 @@ AllowGroups guest imobis
 
 -- делаем доступной подсистему ftp для работы поверх ssh
 Subsystem       sftp    /usr/libexec/sftp-server
+
+
+
+
+------------------------------------ links
+https://help.ubuntu.com/community/SSH/OpenSSH/Keys
+https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys--2
